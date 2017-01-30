@@ -1,21 +1,4 @@
-#!/usr/bin/env python
-#
-# Copyright 2007 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 import webapp2
-
 '''
 Make a signup page that validates a user's input.
 If user submits something invalid, it should print an error message
@@ -36,7 +19,7 @@ page_header = """
     </style>
 </head>
 <body>
-    <h1>Signup</h1>
+    <h1><a href="/">Signup</a></h1>
 """
 
 page_footer = """
@@ -44,35 +27,60 @@ page_footer = """
 </html>
 """
 
+def buildForm(name_error,pass_error):
+    content = """
+    <form class="form" action="/welcome" method="post">
+        <label>
+            Username <input type="text" name="username"/>
+        </label>
+        <span class='error'>""" + name_error + """</span>
+        </br>
+
+        <label>
+            Password <input type="password" name="password"/>
+        </label>
+        <span class='error'>""" + pass_error + """</span>
+        </br>
+
+        <label>
+            Password Verification <input type="password" name="verify"/>
+        </label>
+        </br>
+
+        <label>
+            E-mail <input type="text" name="email"/>
+        </label>
+        </br>
+
+        <input type="submit" value="Submit"/>
+    </form>"""
+    return content
+
 class Index(webapp2.RequestHandler):
     def get(self):
+        name_error = self.request.get("name_error")
+        pass_error = self.request.get("pass_error")
 
-        # username form
-        main_content = """
-        <form class='form'>
-            <label>
-                Username <input type="text" name="username"/>
-            </label>
-            </br>
-            <label>
-                Password <input type="text" name="password"/>
-            </label>
-            </br>
-            <label>
-                Password Verification <input type="text" name="password_verification"/>
-            </label>
-            </br>
-            <label>
-                E-mail <input type="text" name="email"/>
-            </label>
-        </form>
-        """
-
-
-
+        main_content = buildForm(name_error, pass_error)
         self.response.write(page_header + main_content + page_footer)
+
+class Welcome(webapp2.RequestHandler):
+    def post(self):
+        username = self.request.get("username")
+        password = self.request.get("password")
+        verify = self.request.get("verify")
+
+        if username == "":
+            self.redirect("/?name_error=Provide a valid username")
+        if password == "":
+            pass
+            #self.redirect("/?pass_error=Provide a password")
+        else:
+            main_content = "<h1>Welcome, {}!</h1>".format(username)
+            self.response.write(main_content)
 
 #TODO How do i make a handler to start at /signup?
 app = webapp2.WSGIApplication([
-    ('/', Index)
+    ('/', Index),
+    ('/welcome', Welcome)
 ], debug=True)
