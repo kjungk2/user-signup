@@ -32,21 +32,21 @@ PASSWORD_RE = re.compile(r"^.{3,20}$")
 EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
 def valid_username(username):
-    return USER_RE.match(username)
+    return username and USER_RE.match(username)
 
 def valid_password(password):
-    return PASSWORD_RE.match(password)
+    return password and PASSWORD_RE.match(password)
 
 def valid_email(email):
-    return EMAIL_RE.match(email)
+    if email != "":
+        return EMAIL_RE.match(email)
+    return True
 
-
-
-def buildForm(name_error,pass_error,verify_error,email_error):
+def buildForm(username,email,name_error,pass_error,verify_error,email_error):
     content = """
     <form class="form" method="post">
         <label>
-            Username <input type="text" name="username"/>
+            Username <input type="text" name="username" value='""" + username + """'/>
         </label>
         <span class='error'>""" + name_error + """</span>
         </br>
@@ -64,7 +64,7 @@ def buildForm(name_error,pass_error,verify_error,email_error):
         </br>
 
         <label>
-            E-mail <input type="text" name="email"/>
+            E-mail (optional) <input type="text" name="email" value='""" + email + """'/>
         </label>
         <span class='error'>""" + email_error + """</span>
         </br>
@@ -75,7 +75,7 @@ def buildForm(name_error,pass_error,verify_error,email_error):
 
 class Index(webapp2.RequestHandler):
     def get(self):
-        main_content = buildForm("","","","")
+        main_content = buildForm("","","","","","")
         self.response.write(page_header + main_content + page_footer)
 
     def post(self):
@@ -93,16 +93,20 @@ class Index(webapp2.RequestHandler):
         if not valid_username(username):
             error_exists = True
             user_error = "Please enter a valid username"
-        if not valid_password == "":
+        if not valid_password(password):
             error_exists = True
-            pass_error = "Please enter a password"
+            pass_error = "Please enter a valid password"
         elif password != verify:
             error_exists = True
             verify_error = "Passwords don't match"
+        if not valid_email(email):
+            error_exists = True
+            email_error = "Please enter a valid e-mail"
 
         if error_exists:
-            main_content = buildForm(user_error,pass_error,verify_error,email_error)
+            main_content = buildForm(username,email,user_error,pass_error,verify_error,email_error)
             self.response.write(page_header + main_content + page_footer)
+            #self.redirect("/")
 
         else:
             self.redirect("/welcome?username=" + username)
