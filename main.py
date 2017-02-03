@@ -19,7 +19,7 @@ page_header = """
     </style>
 </head>
 <body>
-    <h1><a href="/">Signup</a></h1>
+    <h1><a href="/signup">Signup</a></h1>
 """
 
 page_footer = """
@@ -106,8 +106,8 @@ class Index(webapp2.RequestHandler):
         if error_exists:
             main_content = buildForm(username,email,user_error,pass_error,verify_error,email_error)
             self.response.write(page_header + main_content + page_footer)
-            #self.redirect("/")
 
+        # no error so welcome user
         else:
             self.redirect("/welcome?username=" + username)
 
@@ -117,8 +117,7 @@ class Welcome(webapp2.RequestHandler):
         main_content = "<h1>Welcome, {}!</h1>".format(username)
         self.response.write(main_content)
 
-#TODO How do i make a handler to start at /signup?
 app = webapp2.WSGIApplication([
-    ('/', Index),
+    ('/signup', Index),
     ('/welcome', Welcome)
 ], debug=True)
